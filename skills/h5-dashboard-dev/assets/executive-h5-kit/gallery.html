@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Executive H5 Kit · 组件与设计验证样例</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { margin: 0; }
+  .g-skip { position: fixed; left: 16px; top: -80px; z-index: 120; padding: 10px 16px; background: var(--h5-surface-1); color: var(--h5-text-1); }
+  .g-skip:focus { top: 12px; }
+  .g-topbar { position: sticky; top: 0; z-index: 40; background: var(--h5-surface-1); border-bottom: 1px solid var(--h5-border); }
+  .g-topbar-inner { position: relative; max-width: 1480px; margin: auto; padding: 12px 30px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .g-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .g-mark { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 auto; border-radius: var(--h5-radius-sm); background: var(--h5-surface-hero); color: var(--h5-text-on-dark); font: 700 15px var(--h5-font-number); letter-spacing: -.04em; }
+  .g-brand-name { font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+  .g-brand-sub { color: var(--h5-text-3); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .g-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+  .g-theme-group { display: flex; flex: 0 0 auto; gap: 4px; padding: 3px; border: 1px solid var(--h5-border); border-radius: var(--h5-radius-sm); }
+  .g-theme { flex: 0 0 auto; min-height: 36px; padding: 5px 10px; border: 0; border-radius: calc(var(--h5-radius-sm) - 2px); background: transparent; color: var(--h5-text-2); cursor: pointer; white-space: nowrap; }
+  .g-theme[aria-pressed="true"] { background: var(--h5-surface-2); color: var(--h5-text-1); font-weight: 700; }
+  .g-shell { max-width: 1480px; margin: auto; padding: 24px 30px 40px; }
+  .g-navrow { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+  .g-tabs-label { margin: 0 0 6px; color: var(--h5-text-3); font-size: 11px; letter-spacing: .13em; text-transform: uppercase; }
+  .g-mobile-menu { display: none; }
+  .g-hero { position: relative; isolation: isolate; overflow: hidden; padding: clamp(24px, 4vw, 48px); border-radius: var(--h5-radius-lg); }
+  .g-hero::after { content: ""; position: absolute; z-index: -1; width: 580px; height: 580px; right: -220px; top: -310px; border-radius: 50%; background: radial-gradient(circle, rgba(130,216,210,.18), transparent 66%); }
+  .g-eyebrow { margin: 0 0 16px; color: var(--h5-text-on-dark-muted); font-size: 11px; font-weight: 650; letter-spacing: .16em; text-transform: uppercase; }
+  .g-title { max-width: 900px; margin: 0; color: var(--h5-text-on-dark); font-family: var(--h5-font-display); font-size: clamp(34px, 4.4vw, 62px); font-weight: 650; line-height: 1.13; letter-spacing: -.035em; text-wrap: balance; }
+  .g-narrative { max-width: 760px; margin: 18px 0 0; color: var(--h5-text-on-dark-muted); font-size: clamp(14px, 1.3vw, 17px); }
+  .g-hero-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(250px, .65fr); gap: 36px; align-items: end; margin-top: 38px; }
+  .g-kpi-label { color: var(--h5-text-on-dark-muted); font-size: 13px; }
+  .g-kpi-line { display: flex; align-items: baseline; gap: 12px; margin-top: 2px; }
+  .g-kpi-value { color: var(--h5-text-on-dark); font-size: clamp(52px, 7vw, 86px); font-weight: 650; line-height: 1; }
+  .g-kpi-unit { color: var(--h5-text-on-dark-muted); font-size: 18px; }
+  .g-delta { margin-top: 12px; color: var(--h5-text-on-dark); font-size: 14px; }
+  .g-spark { display: block; width: min(420px, 100%); height: 58px; margin-top: 18px; overflow: visible; }
+  .g-spark-path { fill: none; stroke: var(--h5-brand); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .g-card--hero .g-spark-path { stroke: #82D8D2; }
+  .g-judgment { padding-left: 26px; border-left: 1px solid rgba(220,238,246,.32); }
+  .g-judgment h2 { margin: 0 0 12px; color: var(--h5-text-on-dark); font-size: 14px; }
+  .g-judgment ol { margin: 0; padding: 0; list-style: none; counter-reset: judgment; }
+  .g-judgment li { position: relative; margin-top: 13px; padding-left: 28px; color: var(--h5-text-on-dark-muted); font-size: 13px; counter-increment: judgment; }
+  .g-judgment li::before { content: "0" counter(judgment); position: absolute; left: 0; color: var(--h5-text-on-dark); font: 600 11px var(--h5-font-number); }
+  .g-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+  .g-section-head h2, .g-section-head h3 { margin: 0; font-family: var(--h5-font-display); font-size: 20px; line-height: 1.3; letter-spacing: -.015em; }
+  .g-section-head p { margin: 6px 0 0; color: var(--h5-text-3); font-size: 12px; }
+  .g-card-pad { padding: 24px; }
+  .g-periods { display: flex; flex: 0 0 auto; gap: 4px; }
+  .g-period { min-width: 52px; padding-inline: 10px; }
+  .g-chart { display: block; width: 100%; height: auto; min-height: 230px; }
+  .g-grid-line { stroke: var(--h5-border); stroke-width: 1; stroke-dasharray: 3 5; opacity: .7; }
+  .g-axis-text { fill: var(--h5-text-3); font: 11px var(--h5-font-body); }
+  .g-value-text { fill: var(--h5-text-2); font: 11px var(--h5-font-number); text-anchor: middle; }
+  .g-bar { transform-box: fill-box; transform-origin: center bottom; transition: transform var(--h5-duration-update) var(--h5-ease-standard); }
+  .g-bar--revenue { fill: var(--h5-data-current); }
+  .g-bar--cost { fill: var(--h5-accent); opacity: .82; }
+  .g-budget { stroke: var(--h5-data-reference); stroke-width: 2; stroke-dasharray: 4 4; }
+  .g-chart-summary { margin: 12px 0 0; padding-top: 14px; border-top: 1px solid var(--h5-border); color: var(--h5-text-2); font-size: 13px; }
+  .g-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px; color: var(--h5-text-3); font-size: 11px; }
+  .g-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .g-legend i { width: 14px; height: 3px; background: var(--h5-data-current); }
+  .g-legend .cost i { background: var(--h5-accent); }
+  .g-legend .budget i { height: 0; border-top: 2px dashed var(--h5-data-reference); background: none; }
+  .g-exceptions { display: grid; gap: 4px; }
+  .g-exception-card { display: flex; flex-direction: column; }
+  .g-exception-footer { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--h5-border); }
+  .g-exception-footer p { margin: 0 0 12px; color: var(--h5-text-2); font-size: 12px; }
+  .g-exception-footer .h5-button { width: 100%; }
+  .g-exception { display: grid; grid-template-columns: 32px minmax(0,1fr) auto; gap: 10px; align-items: center; width: 100%; min-height: 68px; padding: 10px 4px; border: 0; border-bottom: 1px solid var(--h5-border); background: transparent; text-align: left; cursor: pointer; }
+  .g-exception:last-child { border-bottom: 0; }
+  .g-exception:hover { background: var(--h5-surface-2); }
+  .g-rank { color: var(--h5-text-3); font: 600 12px var(--h5-font-number); }
+  .g-exception-title { display: block; color: var(--h5-text-1); font-size: 13px; }
+  .g-exception-note { display: block; margin-top: 2px; color: var(--h5-text-3); font-size: 11px; }
+  .g-deviation { color: var(--h5-status-negative); font: 650 15px var(--h5-font-number); white-space: nowrap; }
+  .g-strip { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 24px; overflow: hidden; }
+  .g-strip-item { padding: 20px 24px; border-right: 1px solid var(--h5-border); }
+  .g-strip-item:last-child { border-right: 0; }
+  .g-strip-value { display: block; margin-top: 3px; font-size: 27px; font-weight: 650; }
+  .g-strip-label { color: var(--h5-text-3); font-size: 12px; }
+  .g-page-intro { margin: 6px 0 26px; max-width: 880px; }
+  .g-page-intro h1 { margin: 0; font-family: var(--h5-font-display); font-size: clamp(30px, 4vw, 48px); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+  .g-page-intro p { color: var(--h5-text-2); }
+  .g-driver-list { display: grid; gap: 12px; }
+  .g-driver { display: grid; grid-template-columns: minmax(110px,.7fr) minmax(150px,1.3fr) 64px; gap: 16px; align-items: center; min-height: 56px; padding: 8px 0; border: 0; border-bottom: 1px solid var(--h5-border); background: transparent; text-align: left; cursor: pointer; }
+  .g-driver:hover { color: var(--h5-brand); }
+  .g-track { height: 8px; overflow: hidden; border-radius: 99px; background: var(--h5-surface-2); }
+  .g-fill { display: block; height: 100%; border-radius: inherit; background: var(--h5-data-current); transition: width var(--h5-duration-update) var(--h5-ease-standard); }
+  .g-driver-value { text-align: right; font: 650 15px var(--h5-font-number); }
+  .g-insight { padding: 22px; border-left: 3px solid var(--h5-brand); background: var(--h5-surface-2); }
+  .g-insight h2 { margin: 0 0 12px; font-size: 18px; }
+  .g-insight p { color: var(--h5-text-2); font-size: 14px; }
+  .g-insight strong { color: var(--h5-text-1); }
+  .g-actions { display: grid; gap: 10px; }
+  .g-action { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 14px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--h5-border); }
+  .g-action-index { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--h5-surface-2); font: 650 12px var(--h5-font-number); }
+  .g-action h3 { margin: 0; font-size: 15px; }
+  .g-action p { margin: 4px 0 0; color: var(--h5-text-3); font-size: 12px; }
+  .g-action[data-done="true"] h3 { text-decoration: line-through; color: var(--h5-text-3); }
+  .g-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .g-progress .g-track { flex: 1; }
+  .g-pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--h5-border); }
+  .g-page-count { color: var(--h5-text-3); font: 600 12px var(--h5-font-number); letter-spacing: .1em; }
+  .g-pager-buttons { display: flex; gap: 8px; }
+  .g-footer { display: flex; justify-content: space-between; gap: 20px; max-width: 1480px; margin: auto; padding: 20px 30px 30px; color: var(--h5-text-3); font-size: 11px; }
+  .g-drawer-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px; background: var(--h5-surface-overlay); border-bottom: 1px solid var(--h5-border); }
+  .g-drawer-head h2 { margin: 3px 0 0; font-size: 21px; }
+  .g-drawer-body { padding: 24px; }
+  .g-drawer-body p { color: var(--h5-text-2); }
+  .g-drawer-nav { display: grid; gap: 8px; }
+  .g-drawer-nav .h5-button { justify-content: space-between; }
+  .g-detail-number { margin: 14px 0; font-size: 50px; font-weight: 650; }
+  .g-definition { padding: 16px 0; border-top: 1px solid var(--h5-border); }
+  .g-definition dt { color: var(--h5-text-3); font-size: 12px; }
+  .g-definition dd { margin: 4px 0 0; }
+  @media (max-width: 980px) {
+    .g-hero-grid { grid-template-columns: 1fr; }
+    .g-judgment { padding: 20px 0 0; border-left: 0; border-top: 1px solid rgba(220,238,246,.32); }
+    .g-judgment ol { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  }
+  @media (max-width: 720px) {
+    .g-topbar-inner { padding: 10px 16px; align-items: flex-start; }
+    .g-brand-sub { display: none; }
+    .g-controls { max-width: 100%; overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; }
+    .g-theme { min-height: 40px; }
+    .g-shell { padding: 18px 16px 28px; }
+    .g-tabs-wrap { display: none; }
+    .g-mobile-menu { display: inline-flex; }
+    .g-hero { padding: 24px 20px; }
+    .g-title { font-size: clamp(31px, 10vw, 42px); }
+    .g-hero-grid { margin-top: 28px; gap: 24px; }
+    .g-judgment ol { grid-template-columns: 1fr; gap: 0; }
+    .g-card-pad { padding: 19px 16px; }
+    .g-section-head { flex-direction: column; }
+    .g-periods { width: 100%; }
+    .g-period { flex: 1; }
+    .g-chart { min-height: 190px; }
+    .g-strip { grid-template-columns: 1fr; }
+    .g-strip-item { border-right: 0; border-bottom: 1px solid var(--h5-border); }
+    .g-strip-item:last-child { border-bottom: 0; }
+    .g-driver { grid-template-columns: 100px minmax(80px,1fr) 54px; gap: 10px; font-size: 12px; }
+    .g-action { grid-template-columns: auto minmax(0,1fr); }
+    .g-action .h5-button { grid-column: 2; justify-self: start; }
+    .g-footer { flex-direction: column; padding-inline: 16px; }
+  }
+  @media (max-width: 460px) {
+    .g-brand-name { font-size: 13px; }
+    .g-theme { padding-inline: 8px; font-size: 12px; }
+    .g-controls .h5-button { padding-inline: 10px; font-size: 12px; white-space: nowrap; }
+    .g-topbar-inner { flex-direction: column; gap: 8px; }
+    .g-mobile-menu { position: absolute; top: 10px; right: 16px; }
+    .g-brand { padding-right: 68px; }
+    .g-controls { width: 100%; }
+    .g-kpi-value { font-size: 54px; }
+    .g-pagination { align-items: flex-start; }
+  }
+  @media print {
+    .g-card--hero .g-spark-path { stroke: #175CD3 !important; }
+    .g-card--hero .g-spark circle { fill: #175CD3 !important; }
+    .g-action .h5-button, .g-exception-footer .h5-button { display: none !important; }
+    .h5-panel { margin-bottom: 28px; }
+    .g-page-intro, .g-section-head { break-after: avoid; }
+  }
+</style>
+</head>
+<body class="h5-kit" data-h5-theme="porcelain">
+<a class="g-skip" href="#main">跳到主要内容</a>
+<div id="app">
+<header class="g-topbar h5-no-print">
+  <div class="g-topbar-inner">
+    <div class="g-brand">
+      <span class="g-mark" aria-hidden="true">EH</span>
+      <div><div class="g-brand-name">Executive H5 Kit</div><div class="g-brand-sub">Decision before decoration</div></div>
+    </div>
+    <div class="g-controls">
+      <div class="g-theme-group" role="group" aria-label="视觉主题">
+        <button class="g-theme" data-theme="porcelain" aria-pressed="true">瓷白</button>
+        <button class="g-theme" data-theme="editorial" aria-pressed="false">纸本</button>
+        <button class="g-theme" data-theme="midnight" aria-pressed="false">墨夜</button>
+        <button class="g-theme" data-theme="corporate" aria-pressed="false">企业蓝</button>
+      </div>
+      <button class="h5-button" id="motionToggle" aria-pressed="false">减少动效：关</button>
+      <button class="h5-button g-mobile-menu" id="menuButton">导航</button>
+    </div>
+  </div>
+</header>
+
+<main class="g-shell" id="main">
+  <div class="g-navrow h5-no-print">
+    <div class="g-tabs-wrap">
+      <p class="g-tabs-label">Briefing chapters</p>
+      <div class="h5-tabs" id="pageTabs" role="tablist" aria-label="汇报页面" data-activation="auto">
+        <button class="h5-tab" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview">经营总览</button>
+        <button class="h5-tab" id="tab-drivers" role="tab" aria-selected="false" aria-controls="panel-drivers" tabindex="-1">结构洞察</button>
+        <button class="h5-tab" id="tab-actions" role="tab" aria-selected="false" aria-controls="panel-actions" tabindex="-1">行动清单</button>
+      </div>
+    </div>
+    <span class="h5-chip h5-chip--positive" id="periodBadge">2026 Q3 · 演示数据</span>
+  </div>
+
+  <section class="h5-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="h5-card h5-card--hero g-hero">
+      <p class="g-eyebrow">Executive brief / <span data-period-label>2026 Q3</span></p>
+      <h1 class="g-title" id="heroTitle">增长仍在，但质量开始分化。</h1>
+      <p class="g-narrative" id="heroNarrative"></p>
+      <div class="g-hero-grid">
+        <div>
+          <div class="g-kpi-label">营业收入 · <span data-period-range>2026年7–9月</span></div>
+          <div class="g-kpi-line"><span class="g-kpi-value h5-number" id="revenueValue">8.42</span><span class="g-kpi-unit">亿元</span></div>
+          <div class="g-delta" id="revenueDelta"></div>
+          <svg class="g-spark" id="revenueSpark" viewBox="0 0 420 58" role="img" aria-label="收入三个月趋势"></svg>
+        </div>
+        <aside class="g-judgment" aria-label="本期判断">
+          <h2>本期判断 / 需要带走的三件事</h2>
+          <ol id="judgmentList"></ol>
+        </aside>
+      </div>
+    </div>
+
+    <div class="h5-grid" style="margin-top:24px">
+      <article class="h5-card g-card-pad h5-span-8">
+        <div class="g-section-head">
+          <div><h2>收入与成本 · 月度</h2><p>柱高为零基线；预算用独立刻度，不与实际共用图例颜色</p></div>
+          <div class="g-periods" role="group" aria-label="切换数据期间">
+            <button class="h5-button g-period" data-period="Q1" aria-pressed="false">Q1</button>
+            <button class="h5-button g-period" data-period="Q2" aria-pressed="false">Q2</button>
+            <button class="h5-button g-period" data-period="Q3" aria-pressed="true">Q3</button>
+          </div>
+        </div>
+        <svg class="g-chart" id="trendChart" viewBox="0 0 720 260" role="img" aria-labelledby="trendTitle trendDesc">
+          <title id="trendTitle">收入、成本与预算月度对比</title>
+          <desc id="trendDesc"></desc>
+        </svg>
+        <div class="g-legend" aria-hidden="true"><span><i></i>收入</span><span class="cost"><i></i>成本</span><span class="budget"><i></i>月度预算</span></div>
+        <p class="g-chart-summary" id="trendSummary"></p>
+      </article>
+
+      <article class="h5-card g-card-pad h5-span-4 g-exception-card">
+        <div class="g-section-head"><div><h2>偏差贡献 · 先看哪里</h2><p>按绝对偏差排序；点击打开详情窗格</p></div></div>
+        <div class="g-exceptions" id="exceptionList"></div>
+        <div class="g-exception-footer"><p id="exceptionSummary"></p><button class="h5-button" id="exceptionsMore">进入结构拆解 →</button></div>
+      </article>
+    </div>
+
+    <div class="h5-card g-strip" aria-label="补充指标">
+      <div class="g-strip-item"><span class="g-strip-label">人均产出 · 同比</span><strong class="g-strip-value h5-number" id="productivityValue"></strong></div>
+      <div class="g-strip-item"><span class="g-strip-label">现金转化 · 目标 85%</span><strong class="g-strip-value h5-number" id="cashValue"></strong></div>
+      <div class="g-strip-item"><span class="g-strip-label">关键岗位到岗 · 计划 24 人</span><strong class="g-strip-value h5-number" id="staffValue"></strong></div>
+    </div>
+  </section>
+
+  <section class="h5-panel" id="panel-drivers" role="tabpanel" aria-labelledby="tab-drivers" hidden>
+    <header class="g-page-intro"><p class="g-tabs-label">Structural evidence</p><h1>偏差不是均匀发生，而是集中在两个经营单元。</h1><p>贡献排序用于决定下钻顺序，不等同于绩效评级。点击任一经营单元查看口径与行动建议。</p></header>
+    <div class="h5-grid">
+      <article class="h5-card g-card-pad h5-span-7"><div class="g-section-head"><div><h2>成本偏差贡献</h2><p>单位：万元；按绝对贡献降序</p></div></div><div class="g-driver-list" id="driverList"></div></article>
+      <aside class="g-insight h5-span-5"><h2>读图结论</h2><p id="driverInsight"></p><p><strong>不要用颜色代替证据。</strong>本页使用同一数据色表达贡献大小，风险文字和数值另列，避免把类别色误读成状态色。</p></aside>
+    </div>
+  </section>
+
+  <section class="h5-panel" id="panel-actions" role="tabpanel" aria-labelledby="tab-actions" hidden>
+    <header class="g-page-intro"><p class="g-tabs-label">From evidence to action</p><h1>把结论收束为三项可跟踪的下一步。</h1><p>行动项保留责任与时间，不用“持续关注”“持续赋能”这类无法验收的措辞。状态仅用于组件交互验证。</p></header>
+    <div class="h5-card g-card-pad">
+      <div class="g-progress"><div class="g-track" aria-hidden="true"><span class="g-fill" id="actionProgress" style="width:0%"></span></div><strong class="h5-number" id="actionCount">0 / 3</strong></div>
+      <div class="g-actions" id="actionList"></div>
+    </div>
+  </section>
+
+  <nav class="g-pagination h5-no-print" aria-label="演示翻页">
+    <span class="g-page-count" id="pageCount">01 / 03 · 经营总览</span>
+    <div class="g-pager-buttons"><button class="h5-button" id="prevPage">上一页</button><button class="h5-button h5-button--primary" id="nextPage">下一页</button></div>
+  </nav>
+</main>
+<footer class="g-footer"><span>Executive H5 Kit · 内置合成数据，仅用于技能组件验证</span><span>数据截至与演示期间由同一份元数据驱动 · Kevin / 2026-10</span></footer>
+</div>
+
+<div class="h5-scrim" id="drawerScrim" hidden></div>
+<aside class="h5-drawer" id="contextDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <div class="g-drawer-head"><div><span class="h5-meta" id="drawerKicker">DETAIL</span><h2 id="drawerTitle">详情</h2></div><button class="h5-icon-button" data-h5-close aria-label="关闭窗格">×</button></div>
+  <div class="g-drawer-body" id="drawerBody"></div>
+</aside>
+
+<script src="motion.js"></script>
+<script src="shell.js"></script>
+<script src="chart-theme.js"></script>
+<script>
+(function () {
+  'use strict';
+  var periods = {
+    Q1: {
+      label: '2026 Q1', range: '2026年1–3月', revenue: 6.18, budget: 6.20,
+      months: ['1月','2月','3月'], revenueSeries: [1.92,2.08,2.18], costSeries: [1.30,1.40,1.48], budgetSeries: [1.98,2.08,2.14],
+      title: '收入接近预算，成本质量保持平稳。', narrative: '收入较预算低 0.3%，成本率 67.6%。当前更重要的是守住交付质量，而不是用短期投入换取表面增长。',
+      judgments: ['收入基本贴近预算，暂不触发经营告警','成本率保持在健康区间，关注后续上行压力','先修复一家经营单元的交付节奏'],
+      productivity: '+2.1%', cash: '82%', staff: '18 人',
+      drivers: [46,31,22,16,10], exceptions: [-46,-31,-22]
+    },
+    Q2: {
+      label: '2026 Q2', range: '2026年4–6月', revenue: 7.14, budget: 7.05,
+      months: ['4月','5月','6月'], revenueSeries: [2.21,2.38,2.55], costSeries: [1.52,1.67,1.82], budgetSeries: [2.25,2.35,2.45],
+      title: '增长恢复，但现金转化仍需跟进。', narrative: '收入高于预算 1.3%，成本增速开始接近收入。现金转化低于目标，应优先处理回款而非继续扩大低效投入。',
+      judgments: ['收入恢复正偏差，增长质量尚可','现金转化低于目标，是本期首要约束','把资源投向两个已验证的经营单元'],
+      productivity: '+3.4%', cash: '80%', staff: '21 人',
+      drivers: [68,47,29,18,12], exceptions: [-68,-47,-29]
+    },
+    Q3: {
+      label: '2026 Q3', range: '2026年7–9月', revenue: 8.42, budget: 8.10,
+      months: ['7月','8月','9月'], revenueSeries: [2.61,2.78,3.03], costSeries: [1.89,2.06,2.36], budgetSeries: [2.55,2.70,2.85],
+      title: '增长仍在，但质量开始分化。', narrative: '收入高于预算 4.0%，成本增速已连续两期高于收入。偏差集中在两个经营单元，下一阶段应从“扩规模”切换到“修复单位经济性”。',
+      judgments: ['收入高于预算，但不等于增长质量改善','两个经营单元贡献了近六成成本偏差','先修复交付与回款，再讨论新增投入'],
+      productivity: '+5.8%', cash: '83%', staff: '22 人',
+      drivers: [126,91,54,28,17], exceptions: [-126,-91,-54]
+    }
+  };
+  var driverNames = ['湖区度假单元','山地文旅单元','酒店运营单元','商业配套单元','其他'];
+  var actionDefs = [
+    { title: '复核两个高偏差经营单元的成本桥', owner: '经营分析 + 财务', due: '本周五前', done: false },
+    { title: '将现金转化拆解到三个逾期回款批次', owner: '运营 + 财务', due: '下周二前', done: false },
+    { title: '提交新增投入的单位经济性复评', owner: '业务负责人', due: '下次经营会前', done: false }
+  ];
+  var pageDefs = [
+    { tab: 'tab-overview', panel: 'panel-overview', name: '经营总览' },
+    { tab: 'tab-drivers', panel: 'panel-drivers', name: '结构洞察' },
+    { tab: 'tab-actions', panel: 'panel-actions', name: '行动清单' }
+  ];
+  var state = { period: 'Q3', page: 0, theme: 'porcelain' };
+  var latest = H5Motion.createLatest();
+  var compactMedia = window.matchMedia('(max-width: 720px)');
+  var trendNodes = null;
+  var panelAnimation = null;
+
+  function el(id) { return document.getElementById(id); }
+  function fmt(value) { return Number(value).toFixed(2); }
+  function sum(values) { return values.reduce(function (a,b) { return a + b; }, 0); }
+  function svgNode(name, attrs, text) {
+    var node = document.createElementNS('http://www.w3.org/2000/svg', name);
+    Object.keys(attrs || {}).forEach(function (key) { node.setAttribute(key, attrs[key]); });
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function buildTrend(compact) {
+    var svg = el('trendChart');
+    var previous = svg.querySelector('.g-generated');
+    if (previous) previous.remove();
+    svg.setAttribute('viewBox', compact ? '0 0 360 260' : '0 0 720 260');
+    var layer = svgNode('g', { 'class': 'g-generated' });
+    var geometry = compact ?
+      { left: 32, right: 348, centers: [82,180,278], barWidth: 16, revenueOffset: 20, costOffset: -4, budgetHalf: 30 } :
+      { left: 44, right: 704, centers: [164,360,556], barWidth: 28, revenueOffset: 34, costOffset: -6, budgetHalf: 43 };
+    trendNodes = { compact: compact, bars: [], labels: [], budgets: [], months: [] };
+    [0,1,2,3].forEach(function (i) {
+      var y = 204 - i * 61.33;
+      layer.appendChild(svgNode('line', { x1: geometry.left, x2: geometry.right, y1: y, y2: y, 'class': 'g-grid-line' }));
+      layer.appendChild(svgNode('text', { x: geometry.left - 8, y: y + 4, 'text-anchor': 'end', 'class': 'g-axis-text' }, (i * 1.17).toFixed(1)));
+    });
+    geometry.centers.forEach(function (center) {
+      var revenueX = center - geometry.revenueOffset;
+      var costX = center - geometry.costOffset;
+      var revenue = svgNode('rect', { x: revenueX, y: 20, width: geometry.barWidth, height: 184, rx: 4, 'class': 'g-bar g-bar--revenue' });
+      var cost = svgNode('rect', { x: costX, y: 20, width: geometry.barWidth, height: 184, rx: 4, 'class': 'g-bar g-bar--cost' });
+      var budget = svgNode('line', { x1: center - geometry.budgetHalf, x2: center + geometry.budgetHalf, y1: 204, y2: 204, 'class': 'g-budget' });
+      var rv = svgNode('text', { x: compact ? center : revenueX + geometry.barWidth / 2, y: 100, 'class': 'g-value-text' });
+      var cv = svgNode('text', { x: compact ? center : costX + geometry.barWidth / 2, y: compact ? 250 : 100, 'class': 'g-value-text' });
+      var month = svgNode('text', { x: center, y: 232, 'text-anchor': 'middle', 'class': 'g-axis-text' });
+      layer.appendChild(revenue); layer.appendChild(cost); layer.appendChild(budget);
+      layer.appendChild(rv); layer.appendChild(cv); layer.appendChild(month);
+      trendNodes.bars.push({ revenue: revenue, cost: cost });
+      trendNodes.labels.push({ revenue: rv, cost: cv });
+      trendNodes.budgets.push(budget); trendNodes.months.push(month);
+    });
+    svg.appendChild(layer);
+  }
+
+  function renderTrend(data) {
+    var compact = compactMedia.matches;
+    if (!trendNodes || trendNodes.compact !== compact) buildTrend(compact);
+    var max = 3.51;
+    for (var i = 0; i < 3; i += 1) {
+      var revenueScale = data.revenueSeries[i] / max;
+      var costScale = data.costSeries[i] / max;
+      trendNodes.bars[i].revenue.style.transform = 'scaleY(' + revenueScale + ')';
+      trendNodes.bars[i].cost.style.transform = 'scaleY(' + costScale + ')';
+      trendNodes.labels[i].revenue.textContent = fmt(data.revenueSeries[i]);
+      trendNodes.labels[i].cost.textContent = compact ? '成 ' + fmt(data.costSeries[i]) : fmt(data.costSeries[i]);
+      trendNodes.labels[i].revenue.setAttribute('y', 196 - revenueScale * 184);
+      trendNodes.labels[i].cost.setAttribute('y', compact ? 250 : 196 - costScale * 184);
+      var budgetY = 204 - (data.budgetSeries[i] / max) * 184;
+      trendNodes.budgets[i].setAttribute('y1', budgetY);
+      trendNodes.budgets[i].setAttribute('y2', budgetY);
+      trendNodes.months[i].textContent = data.months[i];
+    }
+    var cost = sum(data.costSeries);
+    el('trendSummary').textContent = '本期成本 ' + fmt(cost) + ' 亿元，成本率 ' + (cost / data.revenue * 100).toFixed(1) + '%。收入与成本需同时阅读，不能仅以收入增长判断经营改善。';
+    el('trendDesc').textContent = data.range + '，收入分别为 ' + data.revenueSeries.join('、') + ' 亿元；成本分别为 ' + data.costSeries.join('、') + ' 亿元。';
+  }
+
+  function renderSpark(data) {
+    var svg = el('revenueSpark');
+    svg.textContent = '';
+    var min = Math.min.apply(null, data.revenueSeries) - .12;
+    var max = Math.max.apply(null, data.revenueSeries) + .12;
+    var points = data.revenueSeries.map(function (value, index) {
+      return (18 + index * 192) + ',' + (48 - (value - min) / (max - min) * 38);
+    });
+    svg.appendChild(svgNode('path', { d: 'M' + points.join(' L'), 'class': 'g-spark-path' }));
+    points.forEach(function (point) {
+      var xy = point.split(',');
+      svg.appendChild(svgNode('circle', { cx: xy[0], cy: xy[1], r: 4, fill: '#82D8D2' }));
+    });
+  }
+
+  function exceptionData(data) {
+    return data.exceptions.map(function (value, index) {
+      return { name: driverNames[index], value: value, note: index === 0 ? '交付外采与临时用工' : index === 1 ? '能源与维保超支' : '营销投放超预算' };
+    });
+  }
+
+  function openDetail(item, trigger) {
+    el('drawerKicker').textContent = 'COST VARIANCE / 成本偏差';
+    el('drawerTitle').textContent = item.name;
+    el('drawerBody').innerHTML = '<p>' + item.note + '</p><div class="g-detail-number h5-number" style="color:var(--h5-status-negative)">' + item.value + ' 万元</div>' +
+      '<dl><div class="g-definition"><dt>本期口径</dt><dd>' + periods[state.period].range + ' · 实际减预算</dd></div>' +
+      '<div class="g-definition"><dt>建议动作</dt><dd>先拆数量、单价和一次性因素，再决定压降或修复交付。</dd></div>' +
+      '<div class="g-definition"><dt>数据说明</dt><dd>合成演示数据，不用于真实经营判断。</dd></div></dl>';
+    drawer.open(trigger);
+  }
+
+  function renderExceptions(data) {
+    var host = el('exceptionList');
+    host.textContent = '';
+    var items = exceptionData(data);
+    items.forEach(function (item, index) {
+      var button = document.createElement('button');
+      button.className = 'g-exception';
+      button.innerHTML = '<span class="g-rank">0' + (index + 1) + '</span><span><span class="g-exception-title">' + item.name + '</span><span class="g-exception-note">' + item.note + '</span></span><span class="g-deviation">' + item.value + '</span>';
+      button.setAttribute('aria-label', item.name + '，成本偏差 ' + item.value + ' 万元，查看详情');
+      button.addEventListener('click', function () { openDetail(item, button); });
+      host.appendChild(button);
+    });
+    var absolute = items.map(function (item) { return Math.abs(item.value); });
+    var topTwoShare = (absolute[0] + absolute[1]) / sum(absolute) * 100;
+    el('exceptionSummary').textContent = '前两项占当前异常清单 ' + topTwoShare.toFixed(1) + '%，建议优先下钻，而非平均检查全部单元。';
+  }
+
+  function renderDrivers(data) {
+    var host = el('driverList');
+    host.textContent = '';
+    var max = Math.max.apply(null, data.drivers);
+    data.drivers.forEach(function (value, index) {
+      var item = { name: driverNames[index], value: -value, note: '成本偏差贡献拆解' };
+      var button = document.createElement('button');
+      button.className = 'g-driver';
+      button.innerHTML = '<span>' + item.name + '</span><span class="g-track" aria-hidden="true"><span class="g-fill" style="width:' + (value / max * 100) + '%"></span></span><span class="g-driver-value">' + value + '</span>';
+      button.setAttribute('aria-label', item.name + '，成本偏差贡献 ' + value + ' 万元，查看详情');
+      button.addEventListener('click', function () { openDetail(item, button); });
+      host.appendChild(button);
+    });
+    var topTwo = data.drivers[0] + data.drivers[1];
+    var total = sum(data.drivers);
+    el('driverInsight').textContent = driverNames[0] + '与' + driverNames[1] + '合计贡献 ' + topTwo + ' 万元，占全部列示偏差 ' + (topTwo / total * 100).toFixed(1) + '%。优先下钻这两家，比平均检查所有单元更有效。';
+  }
+
+  function renderPeriod(id) {
+    if (!periods[id]) return;
+    var ticket = latest.next();
+    state.period = id;
+    var data = periods[id];
+    document.querySelectorAll('[data-period]').forEach(function (button) {
+      if (button.hasAttribute('aria-pressed')) button.setAttribute('aria-pressed', String(button.dataset.period === id));
+    });
+    document.querySelectorAll('[data-period-label]').forEach(function (node) { node.textContent = data.label; });
+    document.querySelectorAll('[data-period-range]').forEach(function (node) { node.textContent = data.range; });
+    el('periodBadge').textContent = data.label + ' · 演示数据';
+    el('heroTitle').textContent = data.title;
+    el('heroNarrative').textContent = data.narrative;
+    var variance = (data.revenue - data.budget) / data.budget * 100;
+    el('revenueDelta').textContent = (variance >= 0 ? '高于预算 ' : '低于预算 ') + Math.abs(variance).toFixed(1) + '% · 预算 ' + fmt(data.budget) + ' 亿元';
+    H5Motion.tweenNumber(el('revenueValue'), data.revenue, { format: fmt, duration: 420 });
+    el('productivityValue').textContent = data.productivity;
+    el('cashValue').textContent = data.cash;
+    el('staffValue').textContent = data.staff;
+    el('judgmentList').innerHTML = data.judgments.map(function (text) { return '<li>' + text + '</li>'; }).join('');
+    if (!ticket.isCurrent()) return;
+    renderTrend(data); renderSpark(data); renderExceptions(data); renderDrivers(data);
+  }
+
+  function renderActions() {
+    var host = el('actionList');
+    host.textContent = '';
+    actionDefs.forEach(function (action, index) {
+      var row = document.createElement('article');
+      row.className = 'g-action';
+      row.dataset.done = String(action.done);
+      row.innerHTML = '<span class="g-action-index">0' + (index + 1) + '</span><div><h3>' + action.title + '</h3><p>' + action.owner + ' · ' + action.due + '</p></div>';
+      var button = document.createElement('button');
+      button.className = 'h5-button';
+      button.setAttribute('aria-pressed', String(action.done));
+      button.textContent = action.done ? '已完成' : '标记完成';
+      button.addEventListener('click', function () {
+        action.done = !action.done;
+        renderActions();
+      });
+      row.appendChild(button); host.appendChild(row);
+    });
+    var done = actionDefs.filter(function (action) { return action.done; }).length;
+    el('actionProgress').style.width = (done / actionDefs.length * 100) + '%';
+    el('actionCount').textContent = done + ' / ' + actionDefs.length;
+  }
+
+  function updatePager() {
+    var def = pageDefs[state.page];
+    el('pageCount').textContent = '0' + (state.page + 1) + ' / 03 · ' + def.name;
+    el('prevPage').disabled = state.page === 0;
+    el('nextPage').disabled = state.page === pageDefs.length - 1;
+  }
+
+  var tabs = H5Shell.initTabs(el('pageTabs'), { activation: 'auto' });
+  el('pageTabs').addEventListener('h5:tabchange', function (event) {
+    var id = event.detail.id;
+    state.page = pageDefs.findIndex(function (def) { return def.tab === id; });
+    updatePager();
+    if (panelAnimation) panelAnimation.cancel();
+    if (!H5Motion.preference().reduced && event.detail.panel.animate) {
+      panelAnimation = event.detail.panel.animate([
+        { opacity: .72, transform: 'translateY(8px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: 320, easing: 'cubic-bezier(.2,0,0,1)' });
+    }
+  });
+
+  function goPage(index) {
+    if (index < 0 || index >= pageDefs.length) return;
+    tabs.activate(pageDefs[index].tab, { focus: true });
+  }
+  el('prevPage').addEventListener('click', function () { goPage(state.page - 1); });
+  el('nextPage').addEventListener('click', function () { goPage(state.page + 1); });
+  el('exceptionsMore').addEventListener('click', function () { goPage(1); });
+  document.addEventListener('keydown', function (event) {
+    if (!event.altKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    if (event.key === 'ArrowRight') { event.preventDefault(); goPage(state.page + 1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); goPage(state.page - 1); }
+  });
+
+  var drawer = H5Shell.initDrawer({
+    drawer: el('contextDrawer'), scrim: el('drawerScrim'), trigger: el('menuButton'), modal: true,
+    background: [el('app')]
+  });
+  el('menuButton').addEventListener('click', function () {
+    el('drawerKicker').textContent = 'BRIEFING CHAPTERS';
+    el('drawerTitle').textContent = '演示导航';
+    var nav = document.createElement('nav');
+    nav.className = 'g-drawer-nav';
+    nav.setAttribute('aria-label', '移动演示导航');
+    pageDefs.forEach(function (def, index) {
+      var button = document.createElement('button');
+      button.className = 'h5-button';
+      button.setAttribute('aria-current', index === state.page ? 'page' : 'false');
+      button.innerHTML = '<span>' + def.name + '</span><span class="h5-number">0' + (index + 1) + '</span>';
+      button.addEventListener('click', function () { goPage(index); drawer.close(); });
+      nav.appendChild(button);
+    });
+    el('drawerBody').textContent = '';
+    el('drawerBody').appendChild(nav);
+  }, true);
+
+  document.querySelectorAll('[data-period]').forEach(function (button) {
+    if (button.classList.contains('g-period')) button.addEventListener('click', function () { renderPeriod(button.dataset.period); });
+  });
+  document.querySelectorAll('[data-theme]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      state.theme = button.dataset.theme;
+      document.body.dataset.h5Theme = state.theme;
+      document.querySelectorAll('.g-theme').forEach(function (item) { item.setAttribute('aria-pressed', String(item === button)); });
+    });
+  });
+
+  el('motionToggle').addEventListener('click', function () {
+    H5Motion.setOverride(H5Motion.preference().override === 'reduce' ? null : 'reduce');
+  });
+  H5Motion.subscribe(function (preference) {
+    document.body.dataset.motion = preference.reduced ? 'reduced' : 'full';
+    el('motionToggle').setAttribute('aria-pressed', String(preference.reduced));
+    el('motionToggle').textContent = '减少动效：' + (preference.reduced ? '开' : '关');
+  });
+
+  renderPeriod('Q3');
+  renderActions();
+  updatePager();
+  function onCompactChange() { renderTrend(periods[state.period]); }
+  if (compactMedia.addEventListener) compactMedia.addEventListener('change', onCompactChange);
+  else if (compactMedia.addListener) compactMedia.addListener(onCompactChange);
+  window.__gallery = {
+    getState: function () { return { period: state.period, page: state.page, theme: state.theme, motion: H5Motion.preference() }; },
+    setPeriod: renderPeriod,
+    goPage: goPage,
+    chartTokens: H5ChartTheme.tokens(document.body),
+    version: '1.0.0'
+  };
+})();
+</script>
+</body>
+</html>
